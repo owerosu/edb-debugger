@@ -20,7 +20,7 @@ add_subdirectory(FunctionFinder)
 add_subdirectory(DebuggerErrorConsole)
 add_subdirectory(BinarySearcher)
 add_subdirectory(InstructionInspector)
-
+add_subdirectory(PythonWrapper)
 # NOTE(eteran): this is deprecated, will be removed at some point in the future...
 if(${BUILD_SIMPLE_REGISTER_VIEW})
 	add_subdirectory(SimpleRegView)
