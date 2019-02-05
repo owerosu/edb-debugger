@@ -33,12 +33,13 @@ public:
 public Q_SLOTS:
     void runScript();
     void lineSent();
-
+	void resetInterpreter();
 private:
     QMenu *menu_ = nullptr;
     QPlainTextEdit* textWidget_ = nullptr;
     QLineEdit* lineWidget_ = nullptr;
 	pybind11::scoped_interpreter *interpreter_ = nullptr;
+	void initInterpreter();
 };
 
 }

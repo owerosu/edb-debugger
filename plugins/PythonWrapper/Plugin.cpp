@@ -84,9 +84,16 @@ PythonWrapper::~PythonWrapper() {
 QLineEdit* PythonWrapper::lineWidget(){
 	return lineWidget_;
 }
+void PythonWrapper::initInterpreter(){
+	if(interpreter_) // Reset if already initialized
+	{
+		delete interpreter_;
+	}
+	interpreter_ = new pybind11::scoped_interpreter;
+}
 QMenu *PythonWrapper::menu(QWidget *parent) {
 	if(!menu_) {
-		interpreter_ = new pybind11::scoped_interpreter;
+		initInterpreter();
 		std::string stdOutErr = // inspired from https://stackoverflow.com/questions/46632488/how-to-catch-python-3-stdout-in-c-code
 	    "import bridge\n"
 		"def _print(txt):\n"
@@ -112,6 +119,7 @@ QMenu *PythonWrapper::menu(QWidget *parent) {
 
 			menu_ = new QMenu(tr("Python Script"), parent);
 			menu_->addAction(dockWidget->toggleViewAction());
+			menu_->addAction(tr("Reset interpreter"),this,SLOT(resetInterpreter()));
 
 			auto docks = mainWindow->findChildren<QDockWidget *>();
 
@@ -161,6 +169,10 @@ void PythonWrapper::lineSent() {
 
 void PythonWrapper::runScript() {
     QMessageBox::information(0, tr("Not implemented"), tr("Not implemented"));
+}
+void PythonWrapper::resetInterpreter() {
+	textWidget_->setPlainText("");
+	initInterpreter();
 }
 
 }
