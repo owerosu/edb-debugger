@@ -181,7 +181,7 @@ void PythonWrapper::resetInterpreter() {
 void PythonWrapper::loadScript() {
 	QString file = QFileDialog::getOpenFileName(edb::v1::debugger_ui,tr("Open a python script:"),QDir::homePath(),tr("Python Script (*.py)"));
 	initInterpreter();
-	QDir parent = QFileInfo(file).dir(); // Retrieve parent directory to to initialize correct python path
+	QDir parent = QFileInfo(file).dir(); // Retrieve parent directory to initialize correct python path
 	pybind11::exec("import sys");
 	pybind11::exec(std::string("sys.path.append('")+parent.absolutePath().toStdString()+std::string("')"));
 	try{
