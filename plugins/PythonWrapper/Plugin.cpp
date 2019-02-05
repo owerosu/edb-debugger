@@ -10,14 +10,15 @@
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QFileDialog>
+#include <QDir>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 #include <pybind11/eval.h>
 #include <string>
 namespace PythonWrapper {
 
-QString helperColoredString(QString color, QString msg)
-{
+QString helperColoredString(QString color, QString msg){
 	QString coloredText ;
 	coloredText.append("<font color=\"");
 	coloredText.append(color);
@@ -90,21 +91,22 @@ void PythonWrapper::initInterpreter(){
 		delete interpreter_;
 	}
 	interpreter_ = new pybind11::scoped_interpreter;
+	textWidget_->setPlainText("");
+	std::string stdOutErr = // inspired from https://stackoverflow.com/questions/46632488/how-to-catch-python-3-stdout-in-c-code
+    "import bridge\n"
+	"def _print(txt):\n"
+	"    bridge.print(str(txt))\n"
+	"def _input(txt=None):\n"
+	"    if txt:\n"
+	"        bridge.print(str(txt))\n"
+	"    return bridge.input()\n"
+	"print=_print\n"
+	"input=_input\n";
+	pybind11::exec(stdOutErr);
 }
 QMenu *PythonWrapper::menu(QWidget *parent) {
 	if(!menu_) {
 		initInterpreter();
-		std::string stdOutErr = // inspired from https://stackoverflow.com/questions/46632488/how-to-catch-python-3-stdout-in-c-code
-	    "import bridge\n"
-		"def _print(txt):\n"
-		"    bridge.print(str(txt))\n"
-		"def _input(txt=None):\n"
-		"    if txt:\n"
-		"        bridge.print(str(txt))\n"
-		"    return bridge.input()\n"
-		"print=_print\n"
-		"input=_input\n";
-		pybind11::exec(stdOutErr);
 		if(auto mainWindow = qobject_cast<QMainWindow *>(edb::v1::debugger_ui)) {
 			auto dockWidget = new QDockWidget(tr("Python console"), mainWindow);
 			dockWidget->setObjectName(QString::fromUtf8("Python console"));
@@ -120,6 +122,7 @@ QMenu *PythonWrapper::menu(QWidget *parent) {
 			menu_ = new QMenu(tr("Python Script"), parent);
 			menu_->addAction(dockWidget->toggleViewAction());
 			menu_->addAction(tr("Reset interpreter"),this,SLOT(resetInterpreter()));
+			menu_->addAction(tr("Run script"),this,SLOT(loadScript()));
 
 			auto docks = mainWindow->findChildren<QDockWidget *>();
 
@@ -151,7 +154,7 @@ void PythonWrapper::bridgePrint(std::string str){
 void PythonWrapper::bridgePrintInput(std::string str){
 	textWidget_->appendHtml(helperColoredString(QString("blue"),QString::fromStdString(str)));
 }
-void PythonWrapper::lineSent() {
+void PythonWrapper::lineSent(){
 	if(!IS_WAITING_TEXT_INPUT)
 	{
 		auto command = lineWidget_->text();
@@ -162,17 +165,27 @@ void PythonWrapper::lineSent() {
 		}
 		catch(pybind11::error_already_set &e)
 		{
-			textWidget_->appendHtml(helperColoredString(QString("red"),e.what()));
+			displayError(e.what());
 		}
 	}
 }
-
+void PythonWrapper::displayError(const char* str){
+	textWidget_->appendHtml(helperColoredString(QString("red"),str));
+}
 void PythonWrapper::runScript() {
     QMessageBox::information(0, tr("Not implemented"), tr("Not implemented"));
 }
 void PythonWrapper::resetInterpreter() {
-	textWidget_->setPlainText("");
 	initInterpreter();
 }
-
+void PythonWrapper::loadScript() {
+	QString file = QFileDialog::getOpenFileName(edb::v1::debugger_ui,tr("Open a python script:"),QDir::homePath(),tr("Python Script (*.py)"));
+	initInterpreter();
+	try{
+		pybind11::eval_file(file.toStdString());
+	}
+	catch(pybind11::error_already_set &e)	{
+		displayError(e.what());
+	}
+}
 }
