@@ -100,8 +100,8 @@ void PythonWrapper::initInterpreter(){
 	"    if txt:\n"
 	"        bridge.print(str(txt))\n"
 	"    return bridge.input()\n"
-	"print=_print\n"
-	"input=_input\n";
+	"__builtins__.print=_print\n"
+	"__builtins__.input=_input\n";
 	pybind11::exec(stdOutErr);
 }
 QMenu *PythonWrapper::menu(QWidget *parent) {
@@ -181,6 +181,9 @@ void PythonWrapper::resetInterpreter() {
 void PythonWrapper::loadScript() {
 	QString file = QFileDialog::getOpenFileName(edb::v1::debugger_ui,tr("Open a python script:"),QDir::homePath(),tr("Python Script (*.py)"));
 	initInterpreter();
+	QDir parent = QFileInfo(file).dir(); // Retrieve parent directory to initiliaze python path
+	pybind11::exec("import sys");
+	pybind11::exec(std::string("sys.path.append('")+parent.absolutePath().toStdString()+std::string("')"));
 	try{
 		pybind11::eval_file(file.toStdString());
 	}
