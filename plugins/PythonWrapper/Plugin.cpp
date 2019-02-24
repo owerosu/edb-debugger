@@ -1,6 +1,7 @@
 #include <Python.h> // Must be" first, see https://stackoverflow.com/questions/15078060/embedding-python-in-qt-5
 #include "Plugin.h"
 #include "edb.h"
+#include "api.h"
 #include <QMessageBox>
 #include <QMenu>
 #include <QDebug>
@@ -50,17 +51,7 @@ PYBIND11_EMBEDDED_MODULE(pythonbridge, m) {
     });
 
 }
-PYBIND11_EMBEDDED_MODULE(edbv1, m) {
-    m.def("get_expression_from_user", [](std::string title,std::string msg) {
-    	edb::address_t  value;
-    	edb::v1::get_expression_from_user(QString::fromStdString(title),QString::fromStdString(msg),&value);
-    	return (unsigned long)value;
-    });
-    m.def("dump_data", [](unsigned long addr) {
-    	edb::v1::dump_data(addr);
-    	return;
-    });
-}
+
 // Skeleton taken from DebuggerErrorConsole plugin
 PythonWrapper::PythonWrapper() : menu_(nullptr) {
 	//Py_Initialize();
