@@ -15,8 +15,8 @@ add_library(${PluginName} SHARED
 	Plugin.h
 )
 
-target_link_libraries(${PluginName} Qt5::Widgets edb python3.7m)
 find_package (Python3 COMPONENTS Development)
+target_link_libraries(${PluginName} Qt5::Widgets edb python3.7m)
 include_directories(${Python3_INCLUDE_DIRS})
 install (TARGETS ${PluginName} DESTINATION ${CMAKE_INSTALL_LIBDIR}/edb)
 
