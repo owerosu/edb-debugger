@@ -32,7 +32,7 @@ PythonWrapper* instance = nullptr;
 
 bool IS_WAITING_TEXT_INPUT = false;
 
-PYBIND11_EMBEDDED_MODULE(bridge, m) {
+PYBIND11_EMBEDDED_MODULE(pythonbridge, m) {
     // `m` is a `py::module` which is used to bind functions and classes
     m.def("print", [](std::string str) {
     	instance->bridgePrint(str);
@@ -50,7 +50,7 @@ PYBIND11_EMBEDDED_MODULE(bridge, m) {
     });
 
 }
-PYBIND11_EMBEDDED_MODULE(edb, m) {
+PYBIND11_EMBEDDED_MODULE(edbv1, m) {
     m.def("get_expression_from_user", [](std::string title,std::string msg) {
     	edb::address_t  value;
     	edb::v1::get_expression_from_user(QString::fromStdString(title),QString::fromStdString(msg),&value);
@@ -93,13 +93,13 @@ void PythonWrapper::initInterpreter(){
 	interpreter_ = new pybind11::scoped_interpreter;
 	textWidget_->setPlainText("");
 	std::string stdOutErr = // inspired from https://stackoverflow.com/questions/46632488/how-to-catch-python-3-stdout-in-c-code
-    "import bridge\n"
+    "import pythonbridge\n"
 	"def _print(txt):\n"
-	"    bridge.print(str(txt))\n"
+	"    pythonbridge.print(str(txt))\n"
 	"def _input(txt=None):\n"
 	"    if txt:\n"
-	"        bridge.print(str(txt))\n"
-	"    return bridge.input()\n"
+	"        pythonbridge.print(str(txt))\n"
+	"    return pythonbridge.input()\n"
 	"__builtins__.print=_print\n"
 	"__builtins__.input=_input\n";
 	pybind11::exec(stdOutErr);
