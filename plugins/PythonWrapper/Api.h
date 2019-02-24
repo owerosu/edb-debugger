@@ -10,6 +10,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 #include "edb.h"
+#include "ISymbolManager.h"
+#include "Symbol.h"
+
 
 namespace py = pybind11;
 
@@ -158,8 +161,43 @@ PYBIND11_EMBEDDED_MODULE(edbv1, m) {
 		.def("__ior__",
 			[](const edb::address_t &addr,unsigned long other) {
 				return  edb::address_t(addr|other);
-			},py::is_operator())
-;
+			},py::is_operator());
+
+    py::class_<ISymbolManager>(m, "symbol_manager")
+    	.def_static("test",
+    		[](){
+    	 	 	 return 42;
+    		});
+    py::class_<Symbol>(m, "Symbol")
+		.def(py::init())
+		.def_property("file",
+			[](const Symbol &sym){
+    			return sym.file.toStdString();
+			},
+			[](Symbol &sym,std::string str){
+				sym.file = str.c_str();
+			})
+		.def_property("name",
+			[](const Symbol &sym){
+				return sym.name.toStdString();
+			},
+			[](Symbol &sym,std::string str){
+				sym.name = str.c_str();
+			})
+		.def_property("name_no_prefix",
+			[](const Symbol &sym){
+				return sym.name.toStdString();
+			},
+			[](Symbol &sym,std::string str){
+				sym.name_no_prefix = str.c_str();
+			})
+		.def_readwrite("address",&Symbol::address)
+		.def_readwrite("size",&Symbol::size)
+		.def_readwrite("char",&Symbol::type)
+		.def("is_code",&Symbol::is_code)
+		.def("is_data",&Symbol::is_data)
+		.def("is_weak",&Symbol::is_weak);
+
     }
 
 
