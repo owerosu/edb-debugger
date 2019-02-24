@@ -1,7 +1,7 @@
+#include <Api.h>
 #include <Python.h> // Must be" first, see https://stackoverflow.com/questions/15078060/embedding-python-in-qt-5
 #include "Plugin.h"
 #include "edb.h"
-#include "api.h"
 #include <QMessageBox>
 #include <QMenu>
 #include <QDebug>
