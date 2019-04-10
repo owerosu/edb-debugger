@@ -13,6 +13,7 @@
 #include "edb.h"
 #include "ISymbolManager.h"
 #include "Symbol.h"
+#include "MemoryRegions.h"
 #include <QStringList>
 namespace py = pybind11;
 
@@ -245,7 +246,10 @@ PYBIND11_EMBEDDED_MODULE(edbv1, m) {
 		.def("is_data",&Symbol::is_data)
 		.def("is_weak",&Symbol::is_weak);
 
-    }
+    py::class_<MemoryRegions>(m, "memory_regions")
+    		.def(py::init());
+
+}
 
 
 
